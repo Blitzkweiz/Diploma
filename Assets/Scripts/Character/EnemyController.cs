@@ -129,7 +129,7 @@ public class EnemyController : CharacterController
 
     protected override void Death()
     {
-        player.GetComponent<PlayerController>().killCount++;
+        //player.GetComponent<PlayerController>().killCount++;
         StartCoroutine(DeathDelay());
         currentState = EnemyState.Death;
     }

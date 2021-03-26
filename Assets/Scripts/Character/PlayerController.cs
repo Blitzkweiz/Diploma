@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.UI;
 using UnityEngine.SceneManagement;
+using Photon.Pun;
 
 public class PlayerController : CharacterController
 {
@@ -10,13 +11,14 @@ public class PlayerController : CharacterController
     public Animator bottomAnimator;
 
     private Rigidbody2D playerRigidbody;
-    public static int collectedAmount = 0;
 
-    public GameObject deathScreen;
-    public GameObject winScreen;
+    private PhotonView photonView;
 
-    public Text killCounterText;
-    public int killCount = 0;
+    //public GameObject deathScreen;
+    //public GameObject winScreen;
+
+    //public Text killCounterText;
+    //public int killCount = 0;
 
     public GameObject crossHair;
     public GameObject bulletPrefab;
@@ -29,35 +31,43 @@ public class PlayerController : CharacterController
     private bool isAiming;
     private bool endOfAiming;
 
-    // Start is called before the first frame update
 
     void Awake()
     {
         Cursor.lockState = CursorLockMode.Locked;
         Cursor.visible = false;
+        playerRigidbody = GetComponent<Rigidbody2D>();
+        photonView = GetComponent<PhotonView>();
     }
 
     void Start()
     {
-        playerRigidbody = GetComponent<Rigidbody2D>();
+        if (!photonView.IsMine)
+        {
+            Destroy(GetComponentInChildren<Camera>().gameObject);
+            Destroy(playerRigidbody);
+        }
+
         currentHealth = maxHealth;
     }
 
-    // Update is called once per frame
-
     void Update()
     {
+        if (!photonView.IsMine)
+            return;
+
         ProcessInputs();
         Animate();
         AimAndShoot();
         Move();
     }
 
+    [PunRPC]
     private void Shoot(float x, float y)
     {
         GameObject bullet = Instantiate(bulletPrefab, transform.position, Quaternion.identity) as GameObject;
         bullet.GetComponent<BulletController>().shooter = gameObject;
-        bullet.AddComponent<Rigidbody2D>().gravityScale = 0;
+        bullet.GetComponent<Rigidbody2D>().gravityScale = 0;
         bullet.GetComponent<Rigidbody2D>().velocity = new Vector2(x, y).normalized * bulletSpeed;
         bullet.transform.Rotate(0.0f, 0.0f, Mathf.Atan2(y, x) * Mathf.Rad2Deg);
         lastFire = Time.time;
@@ -85,7 +95,7 @@ public class PlayerController : CharacterController
             movement.Normalize();
         }
 
-        killCounterText.text = killCount + " x";
+        //killCounterText.text = killCount + " x";
     }
 
     private void Animate()
@@ -112,7 +122,7 @@ public class PlayerController : CharacterController
 
             if (endOfAiming && Time.time > lastFire + fireDelay)
             {
-                Shoot(aim.x, aim.y);
+                photonView.RPC("Shoot", RpcTarget.AllViaServer, aim.x, aim.y);
             }
         }
         else
@@ -123,7 +133,7 @@ public class PlayerController : CharacterController
 
     protected override void Death()
     {
-        deathScreen.SetActive(true); 
+        //deathScreen.SetActive(true); 
         Cursor.lockState = CursorLockMode.Confined;
         Cursor.visible = true;
         StartCoroutine(EndScreen(2.0f));
@@ -138,7 +148,7 @@ public class PlayerController : CharacterController
 
     public void WinGame()
     {
-        winScreen.SetActive(true);
+        //winScreen.SetActive(true);
         Cursor.lockState = CursorLockMode.Confined;
         Cursor.visible = true;
         StartCoroutine(EndScreen(10.0f));

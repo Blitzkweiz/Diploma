@@ -20,7 +20,8 @@ public class SpawnController : MonoBehaviour
 
     void Update()
     {
-        if (GameEvents.current.theBattleBegins && lastSpawn + nextSpawn < Time.time && spawnTime < Time.time)
+        //if (GameEvents.current.theBattleBegins && lastSpawn + nextSpawn < Time.time && spawnTime < Time.time)
+        if (lastSpawn + nextSpawn < Time.time && spawnTime < Time.time)
         {
             position = transform.position;
             Invoke("Spawn", 0.1f);
