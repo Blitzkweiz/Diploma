@@ -2,6 +2,7 @@
 using Photon.Realtime;
 using System.Collections;
 using System.Collections.Generic;
+using TMPro;
 using UnityEngine;
 using UnityEngine.UI;
 
@@ -12,7 +13,11 @@ public class PlayerListingsMenu : MonoBehaviourPunCallbacks
     [SerializeField]
     private PlayerListing playerListing;
     [SerializeField]
-    private Text readyUpText;
+    private Button readyUpButton;
+    [SerializeField]
+    private Button startGameButton;
+
+    private TextMeshProUGUI readyUpText;
 
     private List<PlayerListing> listings = new List<PlayerListing>();
     private RoomsCanvases roomsCanvases;
@@ -22,8 +27,17 @@ public class PlayerListingsMenu : MonoBehaviourPunCallbacks
     public override void OnEnable()
     {
         base.OnEnable();
-        SetReadyUp(false);
         GetCurrentRoomPlayers();
+        if (PhotonNetwork.IsMasterClient)
+        {
+            readyUpButton.gameObject.SetActive(false);
+        }
+        else
+        {
+            startGameButton.gameObject.SetActive(false);
+            readyUpText = readyUpButton.GetComponentInChildren<TextMeshProUGUI>();
+            SetReadyUp(false);
+        }
     }
 
     public override void OnDisable()
@@ -39,12 +53,15 @@ public class PlayerListingsMenu : MonoBehaviourPunCallbacks
 
     private void SetReadyUp(bool state)
     {
-        ready = state;
-        
-        if (ready)
-            readyUpText.text = "R";
-        else
-            readyUpText.text = "N";
+        if(readyUpText != null)
+        {
+            ready = state;
+
+            if (ready)
+                readyUpText.text = "R";
+            else
+                readyUpText.text = "N";
+        }
     }
 
     public void FirstInitialize(RoomsCanvases canvases)
@@ -109,6 +126,7 @@ public class PlayerListingsMenu : MonoBehaviourPunCallbacks
         {
             for(int i = 0; i < listings.Count; i++)
             {
+                Debug.Log($"player {i} readyup set to {listings[i].Ready}");
                 if (listings[i].Player != PhotonNetwork.LocalPlayer && !listings[i].Ready)
                     return;
             }

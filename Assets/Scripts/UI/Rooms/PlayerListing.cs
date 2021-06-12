@@ -24,17 +24,15 @@ public class PlayerListing : MonoBehaviourPunCallbacks
         base.OnPlayerPropertiesUpdate(targetPlayer, changedProps);
         if(targetPlayer != null && targetPlayer == Player)
         {
-            if (changedProps.ContainsKey("RandomNumber"))
+            if (changedProps.ContainsKey("NickName"))
                 SetPlayerText(targetPlayer);
         }
     }
 
     private void SetPlayerText(Player player)
     {
-        int result = -1;
-        if (player.CustomProperties.ContainsKey("RandomNumber"))
-            result = (int)player.CustomProperties["RandomNumber"];
-
-        text.text = result.ToString() + ", " + player.NickName;
+        text.text = (player.CustomProperties.ContainsKey("NickName") && (string)player.CustomProperties["NickName"] != string.Empty) ? 
+            (string)player.CustomProperties["NickName"] : 
+            "Player" + new System.Random().Next(1000, 9999);
     }
 }

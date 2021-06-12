@@ -68,12 +68,6 @@ public class EnemyController : CharacterController
             }
         }
 
-        if (!GameEvents.current.theBattleBegins)
-        {
-            currentHealth = -1;
-            Death();
-        }
-
         playerDirection = player.transform.position - transform.position;
 
         animator.SetFloat("AttackX", playerDirection.x);

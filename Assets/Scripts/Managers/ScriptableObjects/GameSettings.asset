@@ -12,5 +12,5 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 09589bcb45a99fd4f84d29c9822fc7ba, type: 3}
   m_Name: GameSettings
   m_EditorClassIdentifier: 
-  gameVersion: 0.0.0
+  gameVersion: 0.0.1
   nickName: Blitzkweiz
