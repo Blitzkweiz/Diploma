@@ -37,6 +37,14 @@ public class PoolManager : MonoBehaviour
 
     public GameObject SpawnFromPool(ObjectType type, Vector3 position, Quaternion rotation)
     {
+        if(poolDictionary[type].Count == 0)
+        {
+            GameObject obj = Instantiate(pool.prefab);
+            obj.SetActive(false);
+            obj.transform.SetParent(transform);
+            poolDictionary[type].Enqueue(obj);
+        }
+
         Debug.Log($"{type}, {poolDictionary[type].Count}");
         GameObject objectToSpawn = poolDictionary[type].Dequeue();
         objectToSpawn.SetActive(true);
