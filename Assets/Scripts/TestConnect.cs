@@ -13,13 +13,16 @@ public class TestConnect : MonoBehaviourPunCallbacks
     private Button playButton;
     void Start()
     {
-        Debug.Log("Connecting to Photon...", this);
-        PhotonNetwork.AutomaticallySyncScene = true;
-        PhotonNetwork.NickName = MasterManager.GameSettings.NickName;
-        PhotonNetwork.GameVersion = MasterManager.GameSettings.GameVersion;
-        PhotonNetwork.ConnectUsingSettings();
+        if (!PhotonNetwork.IsConnected)
+        {
+            Debug.Log("Connecting to Photon...", this);
+            PhotonNetwork.AutomaticallySyncScene = true;
+            PhotonNetwork.NickName = MasterManager.GameSettings.NickName;
+            PhotonNetwork.GameVersion = MasterManager.GameSettings.GameVersion;
+            PhotonNetwork.ConnectUsingSettings();
 
-        playButton.interactable = false;
+            playButton.interactable = false;
+        }
     }
 
     public override void OnConnectedToMaster()
@@ -43,7 +46,9 @@ public class TestConnect : MonoBehaviourPunCallbacks
             connectionState.text = "Connecting...";
         }
 
-        playButton.interactable = true;
+        playButton.interactable = false;
+
+        PhotonNetwork.ConnectUsingSettings();
     }
 
     public override void OnJoinedLobby()

@@ -7,6 +7,7 @@ public class GameEvents : MonoBehaviour
 {
     public static GameEvents current;
     public bool theBattleBegins = false;
+    public static List<PlayerController> Players { get; set; }
 
     private void Awake()
     {

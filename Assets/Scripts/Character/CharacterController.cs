@@ -21,5 +21,6 @@ public abstract class CharacterController : MonoBehaviour
         {
             Death();
         }
+        Debug.Log($"Take {damage} damage");
     }
 }

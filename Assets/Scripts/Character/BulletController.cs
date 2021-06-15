@@ -11,10 +11,9 @@ public class BulletController : MonoBehaviour
     private string shooterTag;
     private int damage;
 
-    // Start is called before the first frame update
     void Start()
     {
-        //StartCoroutine(DeathDelay());
+        StartCoroutine(DeathDelay());
         shooterTag = shooter.tag;
         damage = shooter.GetComponent<CharacterController>().damage;
     }
@@ -36,27 +35,35 @@ public class BulletController : MonoBehaviour
         {
             GameObject other = hit.collider.gameObject;
 
-            //if (other.CompareTag("Wall"))
-            //{
-            //    Destroy(gameObject);
-            //    continue;
-            //}
+            if (other.CompareTag("Wall"))
+            {
+                Destroy(gameObject);
+                continue;
+            }
 
-            //if ((shooterTag == "Player") && other.CompareTag("Enemy"))
-            //{
-            //    var enemy = other.GetComponent<CharacterController>();
-            //    enemy.TakeDamage(damage);
-            //    Destroy(gameObject);
-            //    continue;
-            //}
+            if ((shooterTag == "Player") && other.CompareTag("Enemy"))
+            {
+                var enemy = other.GetComponent<CharacterController>();
+                enemy.TakeDamage(damage);
+                Destroy(gameObject);
+                continue;
+            }
 
-            //if ((shooterTag == "Enemy") && other.CompareTag("Player"))
-            //{
-            //    var player = other.GetComponent<CharacterController>();
-            //    player.TakeDamage(damage);
-            //    Destroy(gameObject);
-            //    continue;
-            //}
+            if ((shooterTag == "Enemy") && other.CompareTag("Player"))
+            {
+                var player = other.GetComponent<PlayerController>();
+                player.TakeDamage(damage);
+                Destroy(gameObject);
+                continue;
+            }
+
+            if (((shooterTag == "Player") && other.CompareTag("Player")) && (shooter != other))
+            {
+                var player = other.GetComponent<PlayerController>();
+                player.TakeDamage(damage);
+                Destroy(gameObject);
+                continue;
+            }
         }
     }
 }

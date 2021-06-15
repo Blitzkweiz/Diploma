@@ -12,13 +12,10 @@ public class PlayerController : CharacterController
 
     private Rigidbody2D playerRigidbody;
 
-    private PhotonView photonView;
+    public PhotonView photonView;
 
-    //public GameObject deathScreen;
-    //public GameObject winScreen;
-
-    //public Text killCounterText;
-    //public int killCount = 0;
+    public GameObject deathScreen;
+    public GameObject winScreen;
 
     public GameObject crossHair;
     public GameObject bulletPrefab;
@@ -30,6 +27,8 @@ public class PlayerController : CharacterController
     private Vector3 aim;
     private bool isAiming;
     private bool endOfAiming;
+
+    public int Id;
 
 
     void Awake()
@@ -47,6 +46,7 @@ public class PlayerController : CharacterController
             Destroy(GetComponentInChildren<Camera>().gameObject);
             Destroy(playerRigidbody);
         }
+        Id = PhotonNetwork.LocalPlayer.ActorNumber;
 
         currentHealth = maxHealth;
     }
@@ -60,6 +60,11 @@ public class PlayerController : CharacterController
         Animate();
         AimAndShoot();
         Move();
+
+        if (PhotonNetwork.CurrentRoom.PlayerCount == 1)
+        {
+            WinGame();
+        }
     }
 
     [PunRPC]
@@ -94,8 +99,6 @@ public class PlayerController : CharacterController
         {
             movement.Normalize();
         }
-
-        //killCounterText.text = killCount + " x";
     }
 
     private void Animate()
@@ -133,24 +136,39 @@ public class PlayerController : CharacterController
 
     protected override void Death()
     {
-        //deathScreen.SetActive(true); 
-        Cursor.lockState = CursorLockMode.Confined;
-        Cursor.visible = true;
-        StartCoroutine(EndScreen(2.0f));
+        if (photonView.IsMine)
+        {
+            deathScreen.SetActive(true);
+            Cursor.lockState = CursorLockMode.Confined;
+            Cursor.visible = true;
+            StartCoroutine(EndScreen(2.0f));
+        }
+    }
+
+    public void WinGame()
+    {
+        if (photonView.IsMine) 
+        { 
+            winScreen.SetActive(true);
+            Cursor.lockState = CursorLockMode.Confined;
+            Cursor.visible = true;
+            StartCoroutine(EndScreen(5.0f));
+        }
     }
 
     private IEnumerator EndScreen(float seconds)
     {
         yield return new WaitForSeconds(seconds);
 
-        SceneManager.LoadScene("Menu");
+        StartCoroutine(StartLoadMenu());
     }
 
-    public void WinGame()
+    IEnumerator StartLoadMenu()
     {
-        //winScreen.SetActive(true);
-        Cursor.lockState = CursorLockMode.Confined;
-        Cursor.visible = true;
-        StartCoroutine(EndScreen(10.0f));
+        PhotonNetwork.LeaveRoom(true);
+        while (PhotonNetwork.InRoom)
+            yield return null;
+        PhotonNetwork.Disconnect();
+        PhotonNetwork.LoadLevel(0);
     }
 }

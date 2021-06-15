@@ -1,4 +1,5 @@
-﻿using System.Collections;
+﻿using Photon.Pun;
+using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 
@@ -24,26 +25,26 @@ public class EnemyController : CharacterController
     public Animator animator;
     private Vector3 playerDirection;
 
+    private PhotonView photonView;
+
     public EnemyType enemyType;
     public float range;
 
     public float attackRange;
     public float coolDown;
     public bool coolDownAttack = false;
+    public float bulletSpeed;
 
     public float deathTime;
 
     public GameObject bulletPrefab;
 
-    // Start is called before the first frame update
-
     void Start()
     {
+        photonView = GetComponent<PhotonView>();
         player = GameObject.FindGameObjectWithTag("Player");
         currentHealth = maxHealth;
     }
-
-    // Update is called once per frame
 
     void Update()
     {
@@ -103,15 +104,22 @@ public class EnemyController : CharacterController
                     StartCoroutine(CoolDown());
                     break;
                 case (EnemyType.Ranged):
-                    GameObject bullet = Instantiate(bulletPrefab, transform.position, Quaternion.identity) as GameObject;
-                    bullet.GetComponent<BulletController>().shooter = gameObject;
-                    bullet.AddComponent<Rigidbody2D>().gravityScale = 0;
-                    bullet.GetComponent<Rigidbody2D>().velocity = playerDirection.normalized;
-                    bullet.transform.Rotate(0.0f, 0.0f, Mathf.Atan2(playerDirection.y, playerDirection.x) * Mathf.Rad2Deg);
-                    StartCoroutine(CoolDown());
+                    photonView.RPC("Shoot", RpcTarget.AllViaServer, playerDirection.x, playerDirection.y);
                     break;
             }
         }
+    }
+
+
+    [PunRPC]
+    private void Shoot(float x, float y)
+    {
+        GameObject bullet = Instantiate(bulletPrefab, transform.position, Quaternion.identity) as GameObject;
+        bullet.GetComponent<BulletController>().shooter = gameObject;
+        bullet.AddComponent<Rigidbody2D>().gravityScale = 0;
+        bullet.GetComponent<Rigidbody2D>().velocity = new Vector2(x, y).normalized * bulletSpeed;
+        bullet.transform.Rotate(0.0f, 0.0f, Mathf.Atan2(y, x) * Mathf.Rad2Deg);
+        StartCoroutine(CoolDown());
     }
 
     private IEnumerator CoolDown()
@@ -123,7 +131,6 @@ public class EnemyController : CharacterController
 
     protected override void Death()
     {
-        //player.GetComponent<PlayerController>().killCount++;
         StartCoroutine(DeathDelay());
         currentState = EnemyState.Death;
     }

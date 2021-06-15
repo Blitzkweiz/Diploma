@@ -1,13 +1,19 @@
 ﻿using System.Collections;
 using System.Collections.Generic;
+using System.Linq;
 using UnityEngine;
 using UnityEngine.UI;
 
 public class HealthUIController : MonoBehaviour
 {
-    public GameObject player;
+    private GameObject player;
     public GameObject heartContainer;
     private float fillValue;
+
+    void Start()
+    {
+        player = FindObjectsOfType<PlayerController>().First(x => x.photonView.IsMine).gameObject;
+    }
 
     void Update()
     {
